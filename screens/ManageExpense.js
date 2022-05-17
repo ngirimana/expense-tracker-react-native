@@ -5,10 +5,12 @@ import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/styles";
 import { ExpenseContext } from "../store/expense-context";
 
-function ManageExpense({ route, navigation }) {
+const ManageExpense=({ route, navigation })=> {
   const expensesCtx = useContext(ExpenseContext);
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
+
+  const selectedExpense = expensesCtx.expenses.find((expense) => expense.id === editedExpenseId);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -16,12 +18,12 @@ function ManageExpense({ route, navigation }) {
     });
   }, [navigation, isEditing]);
 
-  function deleteExpenseHandler() {
+  const deleteExpenseHandler=() =>{
     expensesCtx.deleteExpense(editedExpenseId);
     navigation.goBack();
   }
 
-  function cancelHandler() {
+  const cancelHandler=()=> {
     navigation.goBack();
   }
 
@@ -40,6 +42,7 @@ function ManageExpense({ route, navigation }) {
         onCancel={cancelHandler}
         submitButtonLabel={isEditing ? "Update" : "Add"}
         onSubmit={confirmHandler}
+        defaultValues={selectedExpense}
       />
 
       {isEditing && (
