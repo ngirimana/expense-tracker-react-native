@@ -1,17 +1,21 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import IconButton from "../components/UI/IconButton";
+import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { GlobalStyles } from "../constants/styles";
 import { ExpenseContext } from "../store/expense-context";
-import { deleteExpense, storeExpense, updateExpense } from '../util/http';
+import { deleteExpense, storeExpense, updateExpense } from "../util/http";
 
-const ManageExpense=({ route, navigation })=> {
+const ManageExpense = ({ route, navigation }) => {
+  const [isFetching, setIsFetching] = useState(false);
   const expensesCtx = useContext(ExpenseContext);
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
 
-  const selectedExpense = expensesCtx.expenses.find((expense) => expense.id === editedExpenseId);
+  const selectedExpense = expensesCtx.expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -20,27 +24,34 @@ const ManageExpense=({ route, navigation })=> {
   }, [navigation, isEditing]);
 
   const deleteExpenseHandler = async () => {
-     expensesCtx.deleteExpense(editedExpenseId);
+    setIsFetching(true);
+    expensesCtx.deleteExpense(editedExpenseId);
     await deleteExpense(editedExpenseId);
-   
-    navigation.goBack();
-  }
-
-  const cancelHandler=()=> {
-    navigation.goBack();
-  }
-
-  const confirmHandler = async(expenseData) => {
-    if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, expenseData);
-     await updateExpense(editedExpenseId, expenseData);
-    } else {
-  const id=await    storeExpense(expenseData)
-      expensesCtx.addExpense({ ...expenseData, id: id });
-    }
+    setIsFetching(false);
     navigation.goBack();
   };
 
+  const cancelHandler = () => {
+    navigation.goBack();
+  };
+
+  const confirmHandler = async (expenseData) => {
+    setIsFetching(true);
+    if (isEditing) {
+      expensesCtx.updateExpense(editedExpenseId, expenseData);
+
+      await updateExpense(editedExpenseId, expenseData);
+      setIsFetching(false);
+    } else {
+      const id = await storeExpense(expenseData);
+      expensesCtx.addExpense({ ...expenseData, id: id });
+      setIsFetching(false);
+    }
+    navigation.goBack();
+  };
+  if (isFetching) {
+    return <LoadingOverlay />;
+  }
   return (
     <View style={styles.container}>
       <ExpenseForm
@@ -62,7 +73,7 @@ const ManageExpense=({ route, navigation })=> {
       )}
     </View>
   );
-}
+};
 
 export default ManageExpense;
 
