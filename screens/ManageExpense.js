@@ -1,6 +1,7 @@
 import { useContext, useLayoutEffect, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 import IconButton from "../components/UI/IconButton";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { GlobalStyles } from "../constants/styles";
@@ -9,6 +10,7 @@ import { deleteExpense, storeExpense, updateExpense } from "../util/http";
 
 const ManageExpense = ({ route, navigation }) => {
   const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState();
   const expensesCtx = useContext(ExpenseContext);
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
@@ -25,10 +27,14 @@ const ManageExpense = ({ route, navigation }) => {
 
   const deleteExpenseHandler = async () => {
     setIsFetching(true);
-    expensesCtx.deleteExpense(editedExpenseId);
-    await deleteExpense(editedExpenseId);
-    setIsFetching(false);
-    navigation.goBack();
+    try {
+      expensesCtx.deleteExpense(editedExpenseId);
+      await deleteExpense(editedExpenseId);
+      navigation.goBack();
+    } catch (error) {
+      setError("Could not delete the expense -please try again later!");
+      setIsFetching(false);
+    }
   };
 
   const cancelHandler = () => {
@@ -37,18 +43,27 @@ const ManageExpense = ({ route, navigation }) => {
 
   const confirmHandler = async (expenseData) => {
     setIsFetching(true);
-    if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, expenseData);
+    try {
+      if (isEditing) {
+        expensesCtx.updateExpense(editedExpenseId, expenseData);
 
-      await updateExpense(editedExpenseId, expenseData);
-      setIsFetching(false);
-    } else {
-      const id = await storeExpense(expenseData);
-      expensesCtx.addExpense({ ...expenseData, id: id });
+        await updateExpense(editedExpenseId, expenseData);
+        setIsFetching(false);
+      } else {
+        const id = await storeExpense(expenseData);
+        expensesCtx.addExpense({ ...expenseData, id: id });
+        setIsFetching(false);
+      }
+      navigation.goBack();
+    } catch (error) {
+      setError("Could not save -please try again ");
       setIsFetching(false);
     }
-    navigation.goBack();
   };
+
+  if (error && !isFetching) {
+    return <ErrorOverlay message={error} />;
+  }
   if (isFetching) {
     return <LoadingOverlay />;
   }
