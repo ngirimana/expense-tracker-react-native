@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Input from "./Input";
+import Button from "../UI/Button";
 
-const ExpenseForm = () => {
-    const [inputValue, setInputValue] = useState({
-        amount: '',
-        date: '',
-        description: ''
+const ExpenseForm = ({ submitButtonLabel, onCancel, onSubmit }) => {
+  const [inputValue, setInputValue] = useState({
+    amount: "",
+    date: "",
+    description: "",
+  });
+  const inputChangedHandler = (inputIdentifier, enteredValue) => {
+    setInputValue((currentInputValues) => {
+      return { ...currentInputValues, [inputIdentifier]: enteredValue };
     });
-    const inputChangedHandler = (inputIdentifier, enteredValue) => {
-        setInputValue((currentInputValues) => {
-            return {...currentInputValues,[inputIdentifier]:enteredValue}
-        });
-    }
-
+  };
+  const submitHandler = () => {
+    const expenseData = {
+      amount: +inputValue.amount,
+      date: new Date(inputValue.date),
+      description: inputValue.description,
+    };
+    onSubmit(expenseData);
+  };
   return (
     <View style={styles.form}>
       <Text style={styles.title}>Your Expense</Text>
@@ -49,27 +57,44 @@ const ExpenseForm = () => {
           value: inputValue.description,
         }}
       />
+      <View style={styles.buttons}>
+        <Button style={styles.button} mode="flat" onPress={onCancel}>
+          Cancel
+        </Button>
+        <Button style={styles.button} onPress={submitHandler}>
+          {submitButtonLabel}
+        </Button>
+      </View>
     </View>
   );
 };
 
 export default ExpenseForm;
 const styles = StyleSheet.create({
-    form: {
-        marginTop:40
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
-        marginVertical: 24,
-        textAlign:'center'
-    },
+  form: {
+    marginTop: 40,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    marginVertical: 24,
+    textAlign: "center",
+  },
   inputsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
   inputRow: {
     flex: 1,
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
+    minWidth: 120,
+    marginHorizontal: 8,
   },
 });
