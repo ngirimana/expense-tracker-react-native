@@ -1,6 +1,6 @@
 import { createContext, useReducer } from "react";
 
-const ExpenseContext = createContext({
+export const ExpenseContext = createContext({
   expenses: [],
   addExpense: ({ description, amount, date }) => {},
   deleteExpense: (id) => {},
@@ -48,19 +48,19 @@ const DUMMY_EXPENSES = [
     id: "e7",
     description: "A pair of trousers",
     amount: 89.29,
-    date: new Date("2022-01-05"),
+    date: new Date("2022-05-13"),
   },
   {
     id: "e8",
     description: "Some bananas",
     amount: 5.99,
-    date: new Date("2021-12-01"),
+    date: new Date("2022-05-15"),
   },
   {
     id: "e9",
     description: "A book",
     amount: 14.99,
-    date: new Date("2022-02-19"),
+    date: new Date("2022-05-14"),
   },
   {
     id: "e10",
@@ -78,7 +78,7 @@ const expensesReducer = (state, action) => {
           const updatableExpenseIndex = state.findIndex((expense) => expense.id === action.payload.id);
           const updatableExpense = state[updatableExpenseIndex];
           const updatedItem = { ...updatableExpense, ...action.payload.data };
-          const updatedExpenses = [...state];
+          let updatedExpenses = [...state];
           updatedExpenses[updatableExpenseIndex] = updatedItem;
           return updatedExpenses
           
@@ -102,11 +102,18 @@ const ExpenseContextProvider = ({ children }) => {
         payload: id,
       });
     };
-    const UpdateExpense = (id,expenseData) => {
+    const updateExpense = (id,expenseData) => {
       dispatch({
         type: "ADD",
         payload: {id:id,data:expenseData},
       });
     };
-  return <ExpenseContext.Provider>{children}</ExpenseContext.Provider>;
+    const value = {
+        expenses: expensesState,
+        addExpense: addExpense,
+        deleteExpense: deleteExpense,
+        updateExpense: updateExpense
+    }
+  return <ExpenseContext.Provider value={value}>{children}</ExpenseContext.Provider>;
 };
+export default ExpenseContextProvider;

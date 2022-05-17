@@ -3,12 +3,11 @@ import { GlobalStyles } from "../../constants/styles";
 import ExpensesList from "./ExpensesList";
 import ExpensesSummary from "./ExpensesSummary";
 
-
-const ExpensesOutput = ({ expenses,expensesPeriod }) => {
+const ExpensesOutput = ({ expenses, expensesPeriod }) => {
   return (
     <View style={styles.container}>
-      <ExpensesSummary expenses={DUMMY_EXPENSES} periodName={expensesPeriod} />
-      <ExpensesList expenses={DUMMY_EXPENSES}/>
+      <ExpensesSummary expenses={expenses} periodName={expensesPeriod} />
+      <ExpensesList expenses={expenses} />
     </View>
   );
 };
@@ -16,10 +15,10 @@ const ExpensesOutput = ({ expenses,expensesPeriod }) => {
 export default ExpensesOutput;
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom:0,
-    backgroundColor:GlobalStyles.colors.primary700
-  }
+    paddingBottom: 0,
+    backgroundColor: GlobalStyles.colors.primary700,
+  },
 });
